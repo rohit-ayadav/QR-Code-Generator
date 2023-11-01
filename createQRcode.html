@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>QR Code Generator</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #e0f2ff;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        #inputContainer {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #qrcodeContainer {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #qrcode {
+            display: inline-block;
+        }
+
+        #qrcodeMessage {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .buttonContainer {
+            margin-top: 10px;
+        }
+
+        #inputContainer button {
+            margin-right: 10px;
+            margin-top: 5px;
+        }
+
+        .buttonContainer button {
+            margin-right: 10px;
+            margin-top: 5px;
+        }
+
+        #saveButton,
+        #shareButton {
+            display: none;
+        }
+
+        #warningMessage {
+            margin-top: 10px;
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+</head>
+
+<body>
+    <h1>QR Code Generator</h1>
+    <div id="inputContainer">
+        <label for="inputText">Enter text or URL:</label>
+        <br>
+        <input type="text" id="inputText" onkeypress="handleKeyPress(event)">
+        <br>
+        <button onclick="generateQRCode()">Generate QR Code</button>
+    </div>
+    <div id="qrcodeContainer">
+        <div id="qrcode"></div>
+        <div id="qrcodeMessage"></div>
+        <div class="buttonContainer">
+            <button id="saveButton" onclick="saveQRCode()">Save QR Code</button>
+            <button id="shareButton" onclick="shareQRCode()">Share QR Code</button>
+        </div>
+    </div>
+    <div id="warningMessage"></div>
+
+    <script>
+        var qrCodeInstance = null;
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                generateQRCode();
+            }
+        }
+
+        function generateQRCode() {
+            var inputText = document.getElementById("inputText").value;
+            var warningMessage = document.getElementById("warningMessage");
+            var qrcodeContainer = document.getElementById("qrcodeContainer");
+            var qrcode = document.getElementById("qrcode");
+            var qrcodeMessage = document.getElementById("qrcodeMessage");
+            var saveButton = document.getElementById("saveButton");
+            var shareButton = document.getElementById("shareButton");
+
+            var maxLength = 100;
+
+            if (inputText.length > maxLength) {
+                warningMessage.textContent = 'Text exceeds the maximum limit of ' + maxLength + ' characters.';
+                qrcodeContainer.style.display = 'none';
+                qrcodeMessage.textContent = '';
+                saveButton.style.display = 'none';
+                shareButton.style.display = 'none';
+                return;
+            }
+
+            warningMessage.textContent = '';
+
+            if (inputText) {
+                warningMessage.textContent = '';
+                qrcode.innerHTML = '';
+
+                qrCodeInstance = new QRCode(qrcode, {
+                    text: inputText,
+                    width: 128,
+                    height: 128
+                });
+
+                qrcodeContainer.style.display = 'block';
+                qrcodeMessage.textContent = 'QR Code for: ' + inputText;
+                saveButton.style.display = 'inline-block';
+                shareButton.style.display = 'inline-block';
+            } else {
+                qrcodeContainer.style.display = 'none';
+                qrcodeMessage.textContent = '';
+                warningMessage.textContent = 'Please enter text or URL.';
+                saveButton.style.display = 'none';
+                shareButton.style.display = 'none';
+            }
+        }
+
+        function saveQRCode() {
+            var qrcodeDataUrl = document.getElementById("qrcode").querySelector("img").src;
+            var downloadLink = document.createElement("a");
+            downloadLink.href = qrcodeDataUrl;
+            downloadLink.download = "qrcode.png";
+            downloadLink.click();
+        }
+
+        function shareQRCode() {
+            var qrcodeImage = document.getElementById("qrcode").querySelector("img");
+            if (qrcodeImage) {
+                var qrcodeDataUrl = qrcodeImage.src;
+                console.log('QR Code Data URL:', qrcodeDataUrl);
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: "QR Code",
+                        text: "Check out this QR code",
+                        url: qrcodeDataUrl,
+                    })
+                        .then(() => console.log('Successful share'))
+                        .catch((error) => console.log('Error sharing:', error));
+                } else {
+                    alert('Web Share API is not supported in your browser. You can manually share the QR code by copying the image URL: ' + qrcodeDataUrl);
+                }
+            } else {
+                console.log("No QR code image found");
+            }
+        }
+
+    </script>
+    <style>
+        footer {
+            background-color: #f8f8f8;
+            padding: 10px;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            color: #555;
+        }
+
+        footer p {
+            margin: 0;
+        }
+    </style>
+
+    <footer>
+        <p>&copy; 2023 Rohit kumar yadav. All rights reserved.</p>
+    </footer>
+
+</body>
+
+</html>
